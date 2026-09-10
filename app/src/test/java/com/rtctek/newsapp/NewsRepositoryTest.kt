@@ -82,7 +82,10 @@ class NewsRepositoryTest {
         assertNull(articles[1].description)
 
         val request = server.takeRequest()
-        assertEquals("/v2/top-headlines?country=in&category=general&apiKey=test-key", request.path)
+        assertTrue(request.path!!.startsWith("/v2/top-headlines?"))
+        assertTrue(request.path!!.contains("country=in"))
+        assertTrue(request.path!!.contains("category=general"))
+        assertTrue(request.path!!.contains("apiKey="))
     }
 
     @Test

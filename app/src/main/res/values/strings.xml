@@ -35,7 +35,7 @@
     <string name="no_articles">No stories available right now. Tap retry to load the latest news.</string>
     <string name="error_generic">Something went wrong. Please try again.</string>
     <string name="error_no_internet">No internet connection. Check your network and retry.</string>
-    <string name="error_offline">You\’re offline — showing the last synced stories.</string>
+    <string name="error_offline">You’re offline — showing the last synced stories.</string>
     <string name="saved_for_later">Saved for later</string>
     <string name="removed_from_saved">Removed from saved</string>
     <string name="undo">Undo</string>

@@ -45,8 +45,6 @@ class NewsListFragment : Fragment() {
     private lateinit var adapter: NewsListAdapter
     private var carouselAdapter: CarouselAdapter? = null
 
-    private var carouselAdapter: CarouselAdapter? = null
-
     private var latestArticles: List<NewsModel> = emptyList()
     private var latestStatus: CategoryUiState = CategoryUiState()
 
