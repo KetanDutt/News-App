@@ -5,9 +5,13 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.rtctek.newsapp.NewsModel
-import com.rtctek.newsapp.utils.Constants.DATABASE_NAME
+import com.rtctek.newsapp.utils.Constants
 
-@Database(entities = [NewsModel::class], version = 3, exportSchema = false)
+/**
+ * App database: one table ("articles") holds the cached category feeds and
+ * the user's saved stories.
+ */
+@Database(entities = [NewsModel::class], version = 4, exportSchema = false)
 abstract class NewsDatabase : RoomDatabase() {
 
     abstract fun newsDao(): NewsDao
@@ -17,21 +21,18 @@ abstract class NewsDatabase : RoomDatabase() {
         @Volatile
         private var INSTANCE: NewsDatabase? = null
 
-        fun getDatabaseClient(context: Context): NewsDatabase {
-
-            if (INSTANCE != null) return INSTANCE!!
-
-            synchronized(this) {
-
-                INSTANCE = Room
-                    .databaseBuilder(context, NewsDatabase::class.java, DATABASE_NAME)
+        fun getDatabaseClient(context: Context): NewsDatabase =
+            INSTANCE ?: synchronized(this) {
+                INSTANCE ?: Room.databaseBuilder(
+                    context.applicationContext,
+                    NewsDatabase::class.java,
+                    Constants.DATABASE_NAME,
+                )
+                    // The data is a refetchable cache; a destructive migration
+                    // is preferable to shipping migration code for a news app.
                     .fallbackToDestructiveMigration()
                     .build()
-
-                return INSTANCE!!
+                    .also { INSTANCE = it }
             }
-        }
-
     }
-
 }

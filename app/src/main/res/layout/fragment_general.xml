@@ -1,48 +1,86 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context=".fragmentClasses.GeneralFragment">
+    tools:context=".fragments.NewsListFragment">
 
-    <LinearLayout
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:fillViewport="true">
 
-        <TextView
-            android:id="@+id/Top_Headlines"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="10dp"
-            android:layout_marginTop="15dp"
-            android:text="@string/top_headlines"
-            android:textSize="22sp"
-            android:textStyle="bold" />
-
-        <com.jama.carouselview.CarouselView
-            android:id="@+id/home_carousel"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:enableSnapping="true"
-            app:scaleOnScroll="false"
-            app:setAutoPlay="true"
-            app:setAutoPlayDelay="3000"
-            app:carouselOffset="center"
-            app:indicatorAnimationType="drop"
-            app:indicatorRadius="5"
-            app:indicatorPadding="5"
-            app:size="10"
-            app:spacing="10"
-            app:resource="@layout/list_item_for_top_headlines"/>
+            android:orientation="vertical">
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            <TextView
+                android:id="@+id/top_headlines_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginTop="12dp"
+                android:text="@string/top_headlines"
+                android:textAppearance="?attr/textAppearanceHeadline6"
+                android:textColor="?attr/colorOnSurface"
+                android:textStyle="bold" />
 
-    </LinearLayout>
+            <LinearLayout
+                android:id="@+id/carousel_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone"
+                tools:visibility="visible">
 
+                <androidx.viewpager2.widget.ViewPager2
+                    android:id="@+id/carousel_pager"
+                    android:layout_width="match_parent"
+                    android:layout_height="250dp"
+                    android:clipToPadding="false"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp" />
 
-</androidx.core.widget.NestedScrollView>
+                <com.google.android.material.tabs.TabLayout
+                    android:id="@+id/carousel_dots"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@android:color/transparent"
+                    app:tabBackground="@drawable/dot_indicator_selector"
+                    app:tabGravity="center"
+                    app:tabIndicatorHeight="0dp"
+                    app:tabPaddingEnd="5dp"
+                    app:tabPaddingStart="5dp"
+                    app:tabRippleColor="@null" />
+
+            </LinearLayout>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recycler_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false" />
+
+        </LinearLayout>
+
+    </androidx.core.widget.NestedScrollView>
+
+    <com.facebook.shimmer.ShimmerFrameLayout
+        android:id="@+id/shimmer_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="?android:attr/colorBackground"
+        android:visibility="gone">
+
+        <include layout="@layout/list_item_for_shimmer" />
+
+    </com.facebook.shimmer.ShimmerFrameLayout>
+
+    <include
+        android:id="@+id/error_state"
+        layout="@layout/view_error_state" />
+
+</FrameLayout>

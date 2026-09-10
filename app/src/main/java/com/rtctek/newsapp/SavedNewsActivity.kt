@@ -1,120 +1,84 @@
 package com.rtctek.newsapp
 
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.util.TypedValue
-import android.widget.Toast
-import androidx.annotation.AttrRes
-import androidx.annotation.ColorInt
-import androidx.appcompat.app.AlertDialog
+import android.view.View
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
-import androidx.lifecycle.ViewModelProvider
+import androidx.core.view.isVisible
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.rtctek.newsapp.adapters.CustomAdapter
+import com.google.android.material.snackbar.Snackbar
+import com.rtctek.newsapp.adapters.NewsListAdapter
 import com.rtctek.newsapp.architecture.NewsViewModel
-import com.rtctek.newsapp.utils.Constants.NEWS_CONTENT
-import com.rtctek.newsapp.utils.Constants.NEWS_DESCRIPTION
-import com.rtctek.newsapp.utils.Constants.NEWS_IMAGE_URL
-import com.rtctek.newsapp.utils.Constants.NEWS_PUBLICATION_TIME
-import com.rtctek.newsapp.utils.Constants.NEWS_SOURCE
-import com.rtctek.newsapp.utils.Constants.NEWS_TITLE
-import com.rtctek.newsapp.utils.Constants.NEWS_URL
 
+/**
+ * The user's bookmarked stories. Swipe a row to delete it (with Undo),
+ * tap the bookmark icon to remove it, or tap the row to read the story.
+ */
 class SavedNewsActivity : AppCompatActivity() {
 
-    lateinit var recyclerView: RecyclerView
-    private lateinit var viewModel: NewsViewModel
-    private lateinit var newsData: MutableList<NewsModel>
+    private val viewModel: NewsViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_saved_news)
 
-        recyclerView = findViewById(R.id.recyclerView)
-        val layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
-        recyclerView.layoutManager = layoutManager
-        newsData = mutableListOf()
-
-        val adapter = CustomAdapter(newsData)
-
-        val toolbar: Toolbar = findViewById(R.id.toolbar)
-        setSupportActionBar(toolbar)
-        supportActionBar?.setHomeButtonEnabled(true)
+        setSupportActionBar(findViewById<Toolbar>(R.id.toolbar))
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        viewModel = ViewModelProvider(this)[NewsViewModel::class.java]
+        val adapter = NewsListAdapter(
+            showRelativeTime = false,
+            onItemClickListener = ::openArticle,
+            onBookmarkClickListener = viewModel::toggleSaved,
+        )
 
-        // Get Saved News
-        viewModel.getNewsFromDB(context = applicationContext)?.observe(this) {
-            newsData.clear()
-            newsData.addAll(it)
-            adapter.notifyDataSetChanged()
-        }
-
-        adapter.setOnItemClickListener(object : CustomAdapter.OnItemClickListener {
-            override fun onItemClick(position: Int) {
-
-                val intent = Intent(this@SavedNewsActivity, ReadNewsActivity::class.java).apply {
-                    putExtra(NEWS_URL, newsData[position].url)
-                    putExtra(NEWS_TITLE, newsData[position].headLine)
-                    putExtra(NEWS_IMAGE_URL, newsData[position].image)
-                    putExtra(NEWS_DESCRIPTION, newsData[position].description)
-                    putExtra(NEWS_SOURCE, newsData[position].source)
-                    putExtra(NEWS_PUBLICATION_TIME, newsData[position].time)
-                    putExtra(NEWS_CONTENT, newsData[position].content)
-                }
-
-                startActivity(intent)
-            }
-        })
-
-        adapter.setOnItemLongClickListener(object : CustomAdapter.OnItemLongClickListener {
-            override fun onItemLongClick(position: Int) {
-                // Delete saved news dialog
-                recyclerView.findViewHolderForAdapterPosition(position)?.itemView?.setBackgroundColor(
-                    getThemeColor(com.google.android.material.R.attr.colorPrimaryVariant)
-                )
-
-                val alertDialog = AlertDialog.Builder(this@SavedNewsActivity).apply {
-                    setMessage("Delete this News?")
-                    setTitle("Alert!")
-                    setCancelable(false)
-
-                    setPositiveButton(
-                        "Yes"
-                    ) { _, _ ->
-                        this@SavedNewsActivity.let {
-                            viewModel.deleteNews(
-                                it,
-                                news = newsData[position]
-                            )
-                        }
-                        adapter.notifyItemRemoved(position)
-                        Toast.makeText(this@SavedNewsActivity, "Deleted!", Toast.LENGTH_SHORT).show()
-                    }
-
-                    setNegativeButton("No") { _, _ ->
-                        recyclerView.findViewHolderForAdapterPosition(position)?.itemView?.setBackgroundColor(
-                            getThemeColor(com.google.android.material.R.attr.colorPrimary)
-                        )
-                    }
-                }.create()
-
-                alertDialog.show()
-            }
-        })
-
+        val recyclerView = findViewById<RecyclerView>(R.id.recycler_view)
+        recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = adapter
 
+        val snackbarAnchor = findViewById<View>(R.id.saved_container)
+        ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(
+            0,
+            ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT,
+        ) {
+            override fun onMove(
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder,
+                target: RecyclerView.ViewHolder,
+            ): Boolean = false
+
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                val position = viewHolder.bindingAdapterPosition
+                if (position == RecyclerView.NO_POSITION) return
+                val article = adapter.currentList[position]
+                viewModel.deleteSaved(article)
+                Snackbar.make(snackbarAnchor, R.string.removed_from_saved, Snackbar.LENGTH_LONG)
+                    .setAction(R.string.undo) { viewModel.insertSaved(article) }
+                    .show()
+            }
+        }).attachToRecyclerView(recyclerView)
+
+        viewModel.savedNews.observe(this) { articles ->
+            adapter.submitList(articles)
+            findViewById<View>(R.id.empty_state).isVisible = articles.isEmpty()
+        }
+        viewModel.savedUrls.observe(this) { adapter.setSavedUrls(it) }
+        viewModel.message.observe(this) { event ->
+            event.getIfNotHandled()?.let {
+                Snackbar.make(snackbarAnchor, it, Snackbar.LENGTH_SHORT).show()
+            }
+        }
     }
 
-    @ColorInt
-    fun Context.getThemeColor(@AttrRes attribute: Int) = TypedValue().let {
-        theme.resolveAttribute(attribute, it, true)
-        it.data
+    override fun onSupportNavigateUp(): Boolean {
+        finish()
+        return true
     }
 
+    private fun openArticle(article: NewsModel) {
+        startActivity(Intent(this, ReadNewsActivity::class.java).putArticleExtras(article))
+    }
 }

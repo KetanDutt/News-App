@@ -2,19 +2,16 @@
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/mainAct"
+    android:id="@+id/main_container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     tools:context=".MainActivity">
-
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="?attr/colorPrimary"
+        android:background="?attr/colorSurface"
         app:elevation="0dp">
-
 
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
@@ -23,54 +20,33 @@
             app:layout_scrollFlags="scroll|enterAlways"
             app:title="@string/app_name"
             app:titleCentered="true"
-            app:titleTextColor="?attr/colorOnPrimary" />
+            app:titleTextColor="?attr/colorOnSurface" />
 
         <com.google.android.material.tabs.TabLayout
             android:id="@+id/tab_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="?attr/colorPrimary"
+            android:background="?attr/colorSurface"
             app:tabGravity="center"
             app:tabIndicatorColor="@color/deep_sky_blue"
             app:tabIndicatorFullWidth="false"
-            app:tabMaxWidth="0dp"
             app:tabMode="scrollable"
-            app:tabSelectedTextColor="@color/deep_sky_blue" />
-
+            app:tabSelectedTextColor="@color/deep_sky_blue"
+            app:tabTextColor="?attr/colorOnSurface" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <TextView
-        android:id="@+id/display_error"
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipe_refresh"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_gravity="center"
-        android:layout_marginHorizontal="10dp"
-        android:layout_marginVertical="200dp"
-        android:textSize="20sp"
-        android:visibility="gone" />
+        app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
 
-    <androidx.viewpager2.widget.ViewPager2
-        android:id="@+id/view_pager"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior" />
+        <androidx.viewpager2.widget.ViewPager2
+            android:id="@+id/view_pager"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
 
-    <com.facebook.shimmer.ShimmerFrameLayout
-        android:id="@+id/shimmer_layout"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="100dp"
-        android:alpha="0.4"
-        android:animateLayoutChanges="true"
-        android:animationCache="true"
-        android:clipChildren="true"
-        app:shimmer_dropoff="@integer/material_motion_duration_medium_1"
-        app:shimmer_repeat_mode="restart"
-        app:shimmer_shape="linear">
-
-        <include layout="@layout/list_item_for_shimmer" />
-
-    </com.facebook.shimmer.ShimmerFrameLayout>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
