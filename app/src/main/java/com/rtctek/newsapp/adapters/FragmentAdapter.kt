@@ -2,43 +2,21 @@ package com.rtctek.newsapp.adapters
 
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.FragmentStateAdapter
 import androidx.lifecycle.Lifecycle
-import androidx.viewpager2.adapter.FragmentStateAdapter
-import com.rtctek.newsapp.MainActivity
-import com.rtctek.newsapp.fragmentClasses.*
-import com.rtctek.newsapp.utils.Constants.TOTAL_NEWS_TAB
+import com.rtctek.newsapp.fragments.NewsListFragment
+import com.rtctek.newsapp.utils.Constants
 
-class FragmentAdapter(fm: FragmentManager, lifecycle: Lifecycle) : FragmentStateAdapter(fm, lifecycle){
+/** Backing adapter for the home-screen tab bar. */
+class FragmentAdapter(
+    fragmentManager: FragmentManager,
+    lifecycle: Lifecycle,
+) : FragmentStateAdapter(fragmentManager, lifecycle) {
 
-    override fun getItemCount(): Int = TOTAL_NEWS_TAB
+    override fun getItemCount(): Int = Constants.TAB_CATEGORIES.size
 
-    override fun createFragment(position: Int): Fragment {
-
-        when (position) {
-            0 -> {
-                return GeneralFragment()
-            }
-            1 -> {
-                return BusinessFragment()
-            }
-            2 -> {
-                return EntertainmentFragment()
-            }
-            3 -> {
-                return ScienceFragment()
-            }
-            4 -> {
-                return SportsFragment()
-            }
-            5 -> {
-                return TechFragment()
-            }
-            6 -> {
-                return HealthFragment()
-            }
-
-            else -> return BusinessFragment()
-
-        }
-    }
+    override fun createFragment(position: Int): Fragment = NewsListFragment.newInstance(
+        category = Constants.TAB_CATEGORIES[position].query,
+        isGeneral = position == 0,
+    )
 }

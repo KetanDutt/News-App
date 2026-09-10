@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:icon="@drawable/ic_baseline_play_circle_24"
+        android:title="@string/listen"
+        app:showAsAction="always">
+
+        <menu>
+
+            <item
+                android:id="@+id/play_news"
+                android:title="@string/play" />
+
+            <item
+                android:id="@+id/stop_news"
+                android:title="@string/stop" />
+
+            <item android:title="@string/speed">
+
+                <menu>
+                    <group android:checkableBehavior="single">
+                        <item
+                            android:id="@+id/speed_075x"
+                            android:title="0.75x" />
+                        <item
+                            android:id="@+id/speed_1x"
+                            android:checked="true"
+                            android:title="1x" />
+                        <item
+                            android:id="@+id/speed_15x"
+                            android:title="1.5x" />
+                        <item
+                            android:id="@+id/speed_2x"
+                            android:title="2x" />
+                    </group>
+                </menu>
+
+            </item>
+
+        </menu>
+
+    </item>
+
+    <item
+        android:icon="@drawable/overflow_menu"
+        android:title="@string/cd_more"
+        app:showAsAction="always">
+
+        <menu>
+
+            <item
+                android:id="@+id/save_news"
+                android:icon="@drawable/ic_baseline_bookmark_border_24"
+                android:title="@string/save_for_later"
+                app:showAsAction="never" />
+
+            <item
+                android:id="@+id/browse_news"
+                android:icon="@drawable/ic_baseline_open_in_browser_24"
+                android:title="@string/browse"
+                app:showAsAction="never" />
+
+            <item
+                android:id="@+id/share_news"
+                android:icon="@drawable/ic_baseline_share_24"
+                android:title="@string/share"
+                app:showAsAction="never" />
+
+        </menu>
+
+    </item>
+
+</menu>

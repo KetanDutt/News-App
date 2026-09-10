@@ -1,11 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">RTCNewsApp</string>
+
+    <string name="app_name">RTC News</string>
+
+    <!-- Category tabs -->
+    <string name="tab_home">Home</string>
+    <string name="tab_business">Business</string>
+    <string name="tab_entertainment">Entertainment</string>
+    <string name="tab_science">Science</string>
+    <string name="tab_sports">Sports</string>
+    <string name="tab_tech">Tech</string>
+    <string name="tab_health">Health</string>
+
+    <!-- Screens -->
+    <string name="read_news">Read News</string>
+    <string name="saved_news_title">Saved News</string>
+    <string name="search_title">Search</string>
     <string name="top_headlines">Top Headlines</string>
-    <string name="browse">Browse</string>
-    <string name="share">Share</string>
-    <string name="save">Read later</string>
+
+    <!-- Reader menu -->
     <string name="listen">Listen</string>
-    <string name="internet_warming">Check your Internet Connection and Try Again!</string>
-    <string name="news_placeholder">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</string>
+    <string name="play">Play</string>
+    <string name="stop">Stop</string>
+    <string name="speed">Speed</string>
+    <string name="save_for_later">Save for later</string>
+    <string name="remove_from_saved">Remove from saved</string>
+    <string name="browse">Open in browser</string>
+    <string name="share">Share</string>
+    <string name="share_with">Share with…</string>
+    <string name="share_text">Check out this story: %1$s\n%2$s</string>
+
+    <!-- States & feedback -->
+    <string name="retry">Retry</string>
+    <string name="no_articles">No stories available right now. Tap retry to load the latest news.</string>
+    <string name="error_generic">Something went wrong. Please try again.</string>
+    <string name="error_no_internet">No internet connection. Check your network and retry.</string>
+    <string name="error_offline">You\’re offline — showing the last synced stories.</string>
+    <string name="saved_for_later">Saved for later</string>
+    <string name="removed_from_saved">Removed from saved</string>
+    <string name="undo">Undo</string>
+    <string name="invalid_article">This article is no longer available.</string>
+    <string name="no_browser">No browser app installed.</string>
+
+    <!-- Empty states -->
+    <string name="no_saved_news_title">Nothing saved yet</string>
+    <string name="no_saved_news_subtitle">Tap the bookmark icon on any story to read it later. Swipe a story here to remove it.</string>
+    <string name="search_prompt_title">Search the news</string>
+    <string name="search_prompt_subtitle">Find stories by topic, person, or place.</string>
+    <string name="no_results_title">No results found</string>
+    <string name="no_results_subtitle">Nothing matched “%1$s”. Try a different keyword.</string>
+
+    <!-- Text-to-speech -->
+    <string name="tts_not_ready">Text-to-speech is still starting up, try again in a moment.</string>
+    <string name="tts_unsupported">Text-to-speech is not supported on this device.</string>
+
+    <!-- Search -->
+    <string name="search_hint">Search news topics…</string>
+
+    <!-- Accessibility -->
+    <string name="cd_search">Search news</string>
+    <string name="cd_saved">Saved news</string>
+    <string name="cd_more">More options</string>
+    <string name="cd_listen">Listen to this story</string>
+    <string name="cd_add_bookmark">Save story for later</string>
+    <string name="cd_remove_bookmark">Remove story from saved</string>
+    <string name="cd_news_image">Story image</string>
 
 </resources>

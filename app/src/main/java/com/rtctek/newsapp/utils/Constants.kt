@@ -1,27 +1,59 @@
 package com.rtctek.newsapp.utils
 
+import androidx.annotation.StringRes
+import com.rtctek.newsapp.R
+
+/**
+ * App-wide constants: category configuration, intent extras and cache settings.
+ */
 object Constants {
-    const val HOME = "Home"
+
+    // ── NewsAPI query values ────────────────────────────────────────
     const val GENERAL = "general"
-    const val SCIENCE = "science"
-    const val HEALTH = "health"
-    const val ENTERTAINMENT = "entertainment"
     const val BUSINESS = "business"
-    const val TECHNOLOGY = "technology"
+    const val ENTERTAINMENT = "entertainment"
+    const val SCIENCE = "science"
     const val SPORTS = "sports"
-    const val NEWS_URL = "news url"
-    const val NEWS_TITLE = "news title"
-    const val NEWS_IMAGE_URL = "news image url"
-    const val NEWS_SOURCE = "news source"
-    const val NEWS_PUBLICATION_TIME = "news publication time"
-    const val NEWS_DESCRIPTION = "news description"
-    const val NEWS_CONTENT = "news content"
-    const val TOTAL_NEWS_TAB = 7
+    const val TECHNOLOGY = "technology"
+    const val HEALTH = "health"
+    const val SAVED_CATEGORY = "saved"
+    const val SEARCH_CATEGORY = "search"
+
+    /** Country passed to the top-headlines endpoint. */
+    const val COUNTRY = "in"
+
+    /** Categories shown as tabs on the home screen, in order. */
+    val TAB_CATEGORIES: List<TabCategory> = listOf(
+        TabCategory(R.string.tab_home, GENERAL),
+        TabCategory(R.string.tab_business, BUSINESS),
+        TabCategory(R.string.tab_entertainment, ENTERTAINMENT),
+        TabCategory(R.string.tab_science, SCIENCE),
+        TabCategory(R.string.tab_sports, SPORTS),
+        TabCategory(R.string.tab_tech, TECHNOLOGY),
+        TabCategory(R.string.tab_health, HEALTH),
+    )
+
+    // ── UI counts ───────────────────────────────────────────────────
     const val TOP_HEADLINES_COUNT = 5
 
-    const val DATABASE_NAME = "LOGIN_DATABASE"
+    // ── Networking ──────────────────────────────────────────────────
+    const val SEARCH_PAGE_SIZE = 20
 
-    const val DEFAULT_SWIPER_DELAY = 4000L
+    // ── Persistence ─────────────────────────────────────────────────
+    const val DATABASE_NAME = "news_database"
 
-    const val INITIAL_POSITION = 0
+    // ── Intent extras ───────────────────────────────────────────────
+    const val EXTRA_NEWS_TITLE = "com.rtctek.newsapp.extra.NEWS_TITLE"
+    const val EXTRA_NEWS_IMAGE_URL = "com.rtctek.newsapp.extra.NEWS_IMAGE_URL"
+    const val EXTRA_NEWS_DESCRIPTION = "com.rtctek.newsapp.extra.NEWS_DESCRIPTION"
+    const val EXTRA_NEWS_URL = "com.rtctek.newsapp.extra.NEWS_URL"
+    const val EXTRA_NEWS_SOURCE = "com.rtctek.newsapp.extra.NEWS_SOURCE"
+    const val EXTRA_NEWS_PUBLICATION_TIME = "com.rtctek.newsapp.extra.NEWS_PUBLICATION_TIME"
+    const val EXTRA_NEWS_CONTENT = "com.rtctek.newsapp.extra.NEWS_CONTENT"
 }
+
+/** A home-screen tab: a user-facing [labelRes] plus the NewsAPI [query] value. */
+data class TabCategory(
+    @StringRes val labelRes: Int,
+    val query: String,
+)

@@ -1,202 +1,220 @@
 package com.rtctek.newsapp
 
 import android.annotation.SuppressLint
+import android.content.ActivityNotFoundException
 import android.content.Intent
+import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
 import android.speech.tts.TextToSpeech
-import android.speech.tts.Voice
 import android.view.Menu
 import android.view.MenuItem
-import android.webkit.WebChromeClient
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import android.widget.ProgressBar
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
-import androidx.lifecycle.ViewModelProvider
+import androidx.core.view.isVisible
 import com.rtctek.newsapp.architecture.NewsViewModel
-import com.rtctek.newsapp.utils.Constants.NEWS_CONTENT
-import com.rtctek.newsapp.utils.Constants.NEWS_DESCRIPTION
-import com.rtctek.newsapp.utils.Constants.NEWS_IMAGE_URL
-import com.rtctek.newsapp.utils.Constants.NEWS_PUBLICATION_TIME
-import com.rtctek.newsapp.utils.Constants.NEWS_SOURCE
-import com.rtctek.newsapp.utils.Constants.NEWS_TITLE
-import com.rtctek.newsapp.utils.Constants.NEWS_URL
-import java.util.*
+import java.util.Locale
 
-
+/**
+ * In-app article reader (WebView) with text-to-speech, bookmarking, sharing
+ * and external-browser hand-off.
+ */
 class ReadNewsActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
 
-    private lateinit var newsWebView: WebView
-    private lateinit var viewModel: NewsViewModel
-    private lateinit var newsData: ArrayList<NewsModel>
-    private lateinit var tts: TextToSpeech
+    private val viewModel: NewsViewModel by viewModels()
 
-    @SuppressLint("SetJavaScriptEnabled")
+    private lateinit var article: NewsModel
+    private lateinit var webView: WebView
+    private lateinit var progressBar: ProgressBar
+
+    private var menu: Menu? = null
+    private var isArticleSaved = false
+
+    private var tts: TextToSpeech? = null
+    private var ttsReady = false
+    private var speechRate = 1.0f
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val incoming = intent.getNewsArticle()
+        if (incoming == null) {
+            Toast.makeText(this, R.string.invalid_article, Toast.LENGTH_SHORT).show()
+            finish()
+            return
+        }
+        article = incoming
+
         setContentView(R.layout.activity_read_news)
 
-        val toolbar: Toolbar = findViewById(R.id.toolbar)
-        setSupportActionBar(toolbar)
+        setSupportActionBar(findViewById<Toolbar>(R.id.toolbar))
+        supportActionBar?.title = article.source ?: getString(R.string.read_news)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        newsWebView = findViewById(R.id.news_webview)
-        viewModel = ViewModelProvider(this)[NewsViewModel::class.java]
+        progressBar = findViewById(R.id.web_progress)
+        webView = findViewById(R.id.news_webview)
+        setupWebView()
 
-        //loading data into list
-        newsData = ArrayList(1)
-        val newsUrl = intent.getStringExtra(NEWS_URL)
-        val newsContent =
-            intent.getStringExtra(NEWS_CONTENT) + ". get paid version to hear full news. "
-        newsData.add(
-            NewsModel(
-                intent.getStringExtra(NEWS_TITLE)!!,
-                intent.getStringExtra(NEWS_IMAGE_URL),
-                intent.getStringExtra(NEWS_DESCRIPTION),
-                newsUrl,
-                intent.getStringExtra(NEWS_SOURCE),
-                intent.getStringExtra(NEWS_PUBLICATION_TIME),
-                newsContent
-            )
-        )
-
-        // Webview
-        newsWebView.apply {
-            settings.apply {
-                domStorageEnabled = true
-                loadsImagesAutomatically = true
-                mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
-                javaScriptEnabled = true
+        // Hardware/toolbar back walks WebView history before leaving.
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (webView.canGoBack()) webView.goBack() else finish()
             }
-            webViewClient = WebViewClient()
-            webChromeClient = WebChromeClient()
-        }
+        })
 
+        article.url?.takeIf { it.startsWith("http") }?.let { webView.loadUrl(it) }
 
-        if (newsUrl != null) {
-            newsWebView.loadUrl(newsUrl)
-        }
-
-        //text to speech
         tts = TextToSpeech(this, this)
 
+        viewModel.savedUrls.observe(this) { urls ->
+            isArticleSaved = article.url in urls
+            updateSaveMenuItem()
+        }
+        viewModel.message.observe(this) { event ->
+            event.getIfNotHandled()?.let {
+                Toast.makeText(this, it, Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
+    @SuppressLint("SetJavaScriptEnabled")
+    private fun setupWebView() {
+        webView.settings.apply {
+            javaScriptEnabled = true
+            domStorageEnabled = true
+            loadsImagesAutomatically = true
+            // Compatibility mode: allows mixed content only when required,
+            // instead of the previous ALWAYS_ALLOW security hole.
+            mixedContentMode = WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE
+            allowFileAccess = false
+            allowContentAccess = false
+        }
+        webView.webViewClient = object : WebViewClient() {
+            override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
+                progressBar.isVisible = true
+            }
+
+            override fun onPageFinished(view: WebView?, url: String?) {
+                progressBar.isVisible = false
+            }
+        }
+    }
+
+    override fun onSupportNavigateUp(): Boolean {
+        onBackPressedDispatcher.onBackPressed()
+        return true
+    }
+
+    // ── Text-to-speech ──────────────────────────────────────────────
 
     override fun onInit(status: Int) {
-
-        if (status == TextToSpeech.SUCCESS) {
-            val result = tts.setLanguage(Locale.ENGLISH)
-            if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
-                Toast.makeText(this, "TTS Not Supported for this news", Toast.LENGTH_LONG)
-                    .show()
-            }
+        if (status != TextToSpeech.SUCCESS) {
+            ttsReady = false
+            return
+        }
+        val result = tts?.setLanguage(Locale.getDefault())
+        ttsReady = result != null &&
+            result != TextToSpeech.LANG_MISSING_DATA &&
+            result != TextToSpeech.LANG_NOT_SUPPORTED
+        if (!ttsReady) {
+            Toast.makeText(this, R.string.tts_unsupported, Toast.LENGTH_LONG).show()
         }
     }
 
     private fun playNews() {
-        tts.speak(newsData[0].content, TextToSpeech.QUEUE_FLUSH, null, "")
+        if (!ttsReady) {
+            Toast.makeText(this, R.string.tts_not_ready, Toast.LENGTH_SHORT).show()
+            return
+        }
+        tts?.setSpeechRate(speechRate)
+        tts?.speak(buildSpeechText(), TextToSpeech.QUEUE_FLUSH, null, UTTERANCE_ID)
     }
 
-    // Adding voices
-    private val voice1: Voice = Voice(
-        "en-US-SMTf00",
-        Locale("en", "USA"),
-        300,
-        300,
-        false,
-        setOf("NA", "f00", "202009152", "female", null)
-    )
-    private val voice2: Voice = Voice(
-        "en-IN-SMTf00",
-        Locale("en", "IND"),
-        300,
-        300,
-        false,
-        setOf("NA", "f00", "202007071", "female", null)
-    )
-    private val addedVoices: Set<Voice> = setOf(voice1, voice2)
+    /** Title + description/content, stripped of NewsAPI's "[+1234 chars]" stubs. */
+    private fun buildSpeechText(): String {
+        val body = article.content
+            ?.replace(TRAILING_ELLIPSIS_PATTERN, "")
+            ?.takeIf { it.isNotBlank() }
+            ?: article.description
+            ?: ""
+        return "${article.headLine}. $body".trim()
+    }
+
+    // ── Options menu ────────────────────────────────────────────────
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.menu_item_readnewsactivity, menu)
-        return super.onCreateOptionsMenu(menu)
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-
-        when (item.itemId) {
-
-            R.id.share_news -> {
-                val intent = Intent(Intent.ACTION_SEND)
-                intent.putExtra(Intent.EXTRA_TEXT, "Hey, checkout this news : " + newsData[0].url)
-                intent.type = "text/plain"
-                startActivity(Intent.createChooser(intent, "Share with :"))
-                return true
-            }
-
-            R.id.save_news -> {
-                this.let { viewModel.insertNews(this@ReadNewsActivity, newsData[0]) }
-                Toast.makeText(this, "News saved!", Toast.LENGTH_SHORT)
-                    .show()
-            }
-
-            R.id.browse_news -> {
-                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(newsData[0].url))
-                startActivity(intent)
-            }
-
-            // Menu items for vocal news
-            R.id.play_news -> {
-                playNews()
-            }
-
-            R.id.stop_news -> {
-                tts.stop()
-            }
-
-            R.id.speed_075x -> {
-                tts.stop()
-                tts.setSpeechRate(0.75F)
-                playNews()
-            }
-
-            R.id.speed_1x -> {
-                tts.stop()
-                tts.setSpeechRate(1F)
-                playNews()
-            }
-
-            R.id.speed_2x -> {
-                tts.stop()
-                tts.setSpeechRate(2F)
-                playNews()
-            }
-
-            R.id.voice1 -> {
-
-                tts.stop()
-                tts.voice = addedVoices.elementAt(0)
-                playNews()
-
-            }
-
-            R.id.voice2 -> {
-                tts.stop()
-                tts.voice = addedVoices.elementAt(1)
-                playNews()
-            }
-
-            else -> return super.onOptionsItemSelected(item)
-        }
-
+        menuInflater.inflate(R.menu.menu_read_news, menu)
+        this.menu = menu
+        updateSaveMenuItem()
         return true
     }
 
+    private fun updateSaveMenuItem() {
+        val item = menu?.findItem(R.id.save_news) ?: return
+        item.setIcon(
+            if (isArticleSaved) R.drawable.ic_baseline_bookmark_24
+            else R.drawable.ic_baseline_bookmark_border_24
+        )
+        item.setTitle(if (isArticleSaved) R.string.remove_from_saved else R.string.save_for_later)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.play_news -> playNews()
+            R.id.stop_news -> tts?.stop()
+            R.id.speed_075x -> setSpeed(0.75f)
+            R.id.speed_1x -> setSpeed(1.0f)
+            R.id.speed_15x -> setSpeed(1.5f)
+            R.id.speed_2x -> setSpeed(2.0f)
+            R.id.save_news -> viewModel.toggleSaved(article)
+            R.id.share_news -> shareArticle()
+            R.id.browse_news -> openInBrowser()
+            else -> return super.onOptionsItemSelected(item)
+        }
+        return true
+    }
+
+    private fun setSpeed(rate: Float) {
+        speechRate = rate
+        playNews()
+    }
+
+    private fun shareArticle() {
+        val shareIntent = Intent(Intent.ACTION_SEND).apply {
+            type = "text/plain"
+            putExtra(
+                Intent.EXTRA_TEXT,
+                getString(R.string.share_text, article.headLine, article.url.orEmpty()),
+            )
+        }
+        startActivity(Intent.createChooser(shareIntent, getString(R.string.share_with)))
+    }
+
+    private fun openInBrowser() {
+        val url = article.url ?: return
+        try {
+            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+        } catch (_: ActivityNotFoundException) {
+            Toast.makeText(this, R.string.no_browser, Toast.LENGTH_SHORT).show()
+        }
+    }
+
     override fun onDestroy() {
-        tts.stop()
-        tts.shutdown()
+        tts?.stop()
+        tts?.shutdown()
+        tts = null
         super.onDestroy()
+    }
+
+    private companion object {
+        const val UTTERANCE_ID = "news_speech"
+        val TRAILING_ELLIPSIS_PATTERN = Regex("\\s*\\[\\+\\d+ chars?]\\s*$")
     }
 }

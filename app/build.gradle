@@ -1,103 +1,98 @@
 plugins {
-    id 'com.android.application'
-    id 'kotlin-android'
-    id 'kotlin-kapt'
-
-
-    // Make sure that you have the Google services Gradle plugin
-    id 'com.google.gms.google-services'
-
-    // Add the Performance Monitoring Gradle plugin
-    id 'com.google.firebase.firebase-perf'
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.ksp)
 }
-apply plugin: 'kotlin-android'
+
+// NewsAPI key comes from gradle.properties (or the command line via -P).
+// See gradle.properties and docs/SETUP.md for instructions.
+def newsApiKey = (project.findProperty("NEWS_API_KEY") ?: "YOUR_NEWSAPI_KEY_HERE").toString()
 
 android {
+    namespace 'com.rtctek.newsapp'
+    compileSdk 34
 
     defaultConfig {
-        multiDexEnabled true
         applicationId "com.rtctek.newsapp"
         minSdk 21
-        targetSdk 33
-        versionCode 1
-        versionName "1.0"
-        compileSdk 33
+        targetSdk 34
+        versionCode 2
+        versionName "2.0.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-
-//        Please ensure you have a valid API KEY for https://newsapi.org/
-//        to use this app
-//        A valid key will need to be entered in gradle.properties file
-        buildConfigField("String", "API_KEY", "\"d592abdb95a9407b8b300563432fb95e\"")
-
-    }
-
-    compileOptions {
-        coreLibraryDesugaringEnabled true
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        buildConfigField("String", "API_KEY", "\"$newsApiKey\"")
     }
 
     buildTypes {
         debug {
-            minifyEnabled false
-            shrinkResources false
-            debuggable true
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            applicationIdSuffix ".debug"
+            versionNameSuffix "-debug"
         }
-
         release {
             minifyEnabled true
             shrinkResources true
-            debuggable false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
 
-    kotlinOptions {
-        jvmTarget = '1.8'
+    compileOptions {
+        coreLibraryDesugaringEnabled true
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 
-    namespace 'com.rtctek.newsapp'
+    kotlinOptions {
+        jvmTarget = '17'
+    }
+
+    buildFeatures {
+        buildConfig true
+    }
+
+    lint {
+        abortOnError false
+        checkReleaseBuilds false
+    }
 }
 
 dependencies {
-    implementation 'com.android.support:cardview-v7:28.0.0'
-    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.1.5'
+    // Java 8+ API desugaring (java.time on API < 26)
+    coreLibraryDesugaring libs.desugar
 
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
-    implementation 'androidx.viewpager2:viewpager2:1.0.0'
-    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1'
-    implementation "androidx.activity:activity-ktx:1.6.0"
-    implementation 'androidx.core:core-ktx:1.9.0'
-    implementation 'androidx.appcompat:appcompat:1.5.1'
-    implementation 'com.google.android.material:material:1.6.1'
-    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-    testImplementation 'junit:junit:4.13.2'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.3'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
+    // AndroidX UI
+    implementation libs.androidx.core.ktx
+    implementation libs.androidx.appcompat
+    implementation libs.androidx.material
+    implementation libs.androidx.constraintlayout
+    implementation libs.androidx.viewpager2
+    implementation libs.androidx.fragment.ktx
+    implementation libs.androidx.activity.ktx
+    implementation libs.androidx.lifecycle.viewmodel.ktx
+    implementation libs.androidx.lifecycle.livedata.ktx
+    implementation libs.androidx.swiperefreshlayout
 
-    implementation "androidx.room:room-runtime:$room_version"
-    kapt "androidx.room:room-compiler:$room_version"
+    // Room (offline cache + saved news)
+    implementation libs.androidx.room.runtime
+    implementation libs.androidx.room.ktx
+    ksp libs.room.compiler
 
-    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0'
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4'
-    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
+    // Networking
+    implementation libs.retrofit
+    implementation libs.retrofit.gson
+    implementation libs.okhttp
+    implementation libs.okhttp.logging
 
-    implementation 'com.squareup.picasso:picasso:2.71828'
+    // Coroutines
+    implementation libs.coroutines.core
+    implementation libs.coroutines.android
 
-    implementation 'com.facebook.shimmer:shimmer:0.5.0'
+    // Image loading
+    implementation libs.coil
+    implementation libs.shimmer
 
-    implementation 'com.github.jama5262:CarouselView:1.2.2'
-
-
-
-    // Import the BoM for the Firebase platform
-    implementation platform('com.google.firebase:firebase-bom:32.1.0')
-
-    // Add the dependency for the Performance Monitoring library
-    // When using the BoM, you don't specify versions in Firebase library dependencies
-    implementation 'com.google.firebase:firebase-perf'
-
+    // Testing
+    testImplementation libs.junit
+    testImplementation libs.mockwebserver
+    androidTestImplementation libs.androidx.test.ext.junit
+    androidTestImplementation libs.espresso.core
 }
