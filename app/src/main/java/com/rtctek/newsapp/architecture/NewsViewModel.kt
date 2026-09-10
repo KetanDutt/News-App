@@ -55,7 +55,7 @@ class NewsViewModel(application: Application) : AndroidViewModel(application) {
     val savedNews: LiveData<List<NewsModel>> = dao.observeSaved()
 
     /** URLs of all bookmarked stories, for live bookmark-state icons. */
-    val savedUrls: LiveData<Set<String>> = map(dao.observeSavedUrls()) { it.toSet() }
+    val savedUrls: LiveData<Set<String>> = dao.observeSavedUrls().map { it.toSet() }
 
     // ── Category feeds ──────────────────────────────────────────────
 
