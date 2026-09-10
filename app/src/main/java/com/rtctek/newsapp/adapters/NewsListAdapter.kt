@@ -50,7 +50,7 @@ class NewsListAdapter(
 
     override fun onBindViewHolder(holder: NewsViewHolder, position: Int) {
         val article = getItem(position)
-        holder.bind(article, article.url in savedUrls)
+        holder.bind(article, isSaved(article.url))
     }
 
     inner class NewsViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {

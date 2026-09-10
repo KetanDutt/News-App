@@ -74,7 +74,7 @@ class ReadNewsActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         tts = TextToSpeech(this, this)
 
         viewModel.savedUrls.observe(this) { urls ->
-            isArticleSaved = article.url in urls
+            isArticleSaved = article.url != null && article.url in urls
             updateSaveMenuItem()
         }
         viewModel.message.observe(this) { event ->
