@@ -61,7 +61,6 @@
     <string name="cd_search">Search news</string>
     <string name="cd_saved">Saved news</string>
     <string name="cd_more">More options</string>
-    <string name="cd_listen">Listen to this story</string>
     <string name="cd_add_bookmark">Save story for later</string>
     <string name="cd_remove_bookmark">Remove story from saved</string>
     <string name="cd_news_image">Story image</string>
