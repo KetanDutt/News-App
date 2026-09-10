@@ -51,6 +51,12 @@ class NewsViewModel(application: Application) : AndroidViewModel(application) {
 
     private var searchJob: Job? = null
 
+    /** The user's bookmarked stories (newest first). */
+    val savedNews: LiveData<List<NewsModel>> = dao.observeSaved()
+
+    /** URLs of all bookmarked stories, for live bookmark-state icons. */
+    val savedUrls: LiveData<Set<String>> = map(dao.observeSavedUrls()) { it.toSet() }
+
     // ── Category feeds ──────────────────────────────────────────────
 
     /** Live, Room-backed articles for a category tab. */
