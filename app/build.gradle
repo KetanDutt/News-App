@@ -93,6 +93,8 @@ dependencies {
     // Testing
     testImplementation libs.junit
     testImplementation libs.mockwebserver
+    // Real org.json for JVM unit tests (the android.jar stub throws "not mocked")
+    testImplementation 'org.json:json:20240303'
     androidTestImplementation libs.androidx.test.ext.junit
     androidTestImplementation libs.espresso.core
 }

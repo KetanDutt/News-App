@@ -27,16 +27,38 @@ jobs:
       # functional build artifact. Without it the app builds fine and
       # simply shows the placeholder-key error screen at runtime.
       - name: Build debug APK
-        run: ./gradlew :app:assembleDebug --stacktrace
+        run: |
+          set -o pipefail
+          ./gradlew :app:assembleDebug --stacktrace 2>&1 | tee build.log
         env:
           ORG_GRADLE_PROJECT_NEWS_API_KEY: ${{ secrets.NEWS_API_KEY }}
 
       - name: Run unit tests
-        run: ./gradlew :app:testDebugUnitTest --stacktrace
+        run: |
+          set -o pipefail
+          ./gradlew :app:testDebugUnitTest --stacktrace 2>&1 | tee test.log
         env:
           ORG_GRADLE_PROJECT_NEWS_API_KEY: ${{ secrets.NEWS_API_KEY }}
 
+      # Diagnostics: surface the relevant Gradle error excerpt as a PR
+      # comment so failures are actionable without downloading artifacts.
+      - name: Report failure
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          LOG="build.log"
+          [ -f "$LOG" ] || LOG="test.log"
+          {
+            echo "### ❌ CI failed on \`${{ github.sha }}\`"
+            echo '```text'
+            grep -nE "^[eE]: |error:|FAILURE:|What went wrong|Caused by:|Could not|Execution failed" -A 8 "$LOG" | head -150
+            echo '```'
+          } > comment.md
+          gh pr comment "${{ github.event.pull_request.number }}" --body-file comment.md
+
       - name: Upload debug APK artifact
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: app-debug
