@@ -37,7 +37,7 @@ class CarouselAdapter(
         notifyDataSetChanged()
     }
 
-    class CarouselViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    inner class CarouselViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
         private val image: ImageView = itemView.findViewById(R.id.headline_image)
         private val title: TextView = itemView.findViewById(R.id.headline)
