@@ -1,6 +1,5 @@
 package com.rtctek.newsapp
 
-import android.content.Context
 import android.content.Intent
 import androidx.room.ColumnInfo
 import androidx.room.Entity

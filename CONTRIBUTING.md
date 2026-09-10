@@ -1,90 +1,72 @@
-Looking to report an issue/bug or make a feature request? Please refer to the [README file](https://github.com/Raj-m01/News-App/blob/master/README.md).
+# Contributing
 
----
+Looking to report an issue/bug or make a feature request? Please open a
+[GitHub issue](https://github.com/Raj-m01/News-App/issues) with a clear
+description and, if possible, steps to reproduce.
 
 Thanks for your interest in contributing!
 
-# Code contributions
-
-If you're interested in taking on [an open issue](https://github.com/Raj-m01/News-App/issues), please comment on it so others are aware.
-You do not need to ask for permission nor an assignment. Be sure to include a **title, clear description** and **test case** demonstrating the new feature you want to add to the project.
-
 ## Prerequisites
 
-Before you start, please note that the ability to use following technologies is **required** and that existing contributors will not actively teach them to you.
+Working on this project requires:
 
-- [Basic Android development](https://developer.android.com/)
+- [Basic Android development](https://developer.android.com/) knowledge
 - [Kotlin](https://kotlinlang.org/)
-- [Android Studio](https://developer.android.com/studio)
-- Emulator or phone with developer options enabled to test changes.
+- [Android Studio](https://developer.android.com/studio) (Hedgehog or newer)
+- JDK 17 (bundled with recent Android Studio versions)
+- An emulator or device to test on
 
+## Getting started
 
-## Steps to contribue
+1. **Fork** the repository (top-right **Fork** button).
+2. **Clone your fork**
 
-Here are the simple steps for contributing to this repo:
+   ```bash
+   git clone https://github.com/<your-username>/News-App.git
+   cd News-App
+   ```
 
-Firstly fork the repo to your own GitHub account by clicking the Fork button on the top-right corner.
-After the successful fork, you'll acknowledge a copy of this repo on your own.
- 
-1. **Clone the repo**
-  
-      - Now it's time to copy this repo to my own laptop/PC. To clone the repo you can write the below command in **Git Bash**
+3. **Add your NewsAPI key** (see [`docs/SETUP.md`](docs/SETUP.md) for details):
 
-              > git clone <LINK_OF_FORKED_REPO_IN_YOUR_ACCOUNT>
+   ```bash
+   echo 'NEWS_API_KEY=your_real_key_here' >> ~/.gradle/gradle.properties
+   ```
 
-        OR 
+4. **Open the project** in Android Studio and let Gradle sync, or build from
+   the command line:
 
-        You can get the repo link from the Download section of forked repo in your account.
+   ```bash
+   ./gradlew :app:assembleDebug :app:testDebugUnitTest
+   ```
 
+## Making changes
 
-2. **Set up remote repo**
+1. Create a feature branch:
 
-      - When you clone your fork, it will automatically set your fork as the "origin" remote. Use git remote -v to show your current remotes. You should see the URL of your fork (which you copied in step 3) next to the word "origin". 
-      If you don't see the "origin" remote, you can add it using the git command below.
+   ```bash
+   git checkout -b feature/my-feature
+   ```
 
-              > git remote add origin <LINK_OF_FORKED_REPO_IN_YOUR_ACCOUNT>
+2. Keep the codebase healthy:
+   - Follow the existing Kotlin style (`kotlin.code.style=official`).
+   - New UI strings go into `res/values/strings.xml` (never hard-code text).
+   - New date logic belongs in `TimeUtils` with a unit test.
+   - Run `scripts/check-resources.sh` if you add/remove resources.
+   - Make sure `./gradlew :app:testDebugUnitTest` passes.
 
-      - Now you have to set up the upstream. write the following Git command to set up the upstream.
-      > git remote add upstream https://github.com/Raj-m01/News-App.git
+3. Commit with a clear message and push to your fork:
 
-      - Now pull the latest changes from original repo to your local changes by firing the below command
-              > git pull upstream master
-  
-  
-3. **It's Code Time now**
-  
-      After getting the project in code editor, make necessary changes.
+   ```bash
+   git add .
+   git commit -m "Add my feature"
+   git push origin feature/my-feature
+   ```
 
+4. **Open a pull request** against `main` with a descriptive title, what
+   changed and why, and screenshots/screen recordings for UI changes.
 
-4. **Now it's time to save the work**
+## Code of conduct
 
-      - Make a branch for the feature you have worked on
-        > git checkout -b feature_branch_name
-      - Stage the changes you have made by firing the below command
-        > git add .
-      - Commit the changes 
-        > git commit -m "Description of changes in your work"
-      - Push the changes to your forked repo in that specific feature branch
-        >  git push origin feature_branch_name
-        
-    Note: Create a branch for that feature and push there. No direct push to master. 
-        
-        
-5. **Let's finish this**
-    - Go to your forked repo on GitHub website and refresh the page,
-
-    - Click on pull-request and you will be redirected to another page where you will see something like below image 
-
-    - After that you have to write your GitHub username as the title of your pull-request and describe your work if you want and that's it!! Create a pull-request by clicking the button
-    Also add the below 2 lines in the description. It is compulsory for successful submission.
-
-    ![Screenshot 2021-09-26 at 6 58 08 PM](https://user-images.githubusercontent.com/58077762/94461826-43fab680-01d8-11eb-96cd-80b2d69e13be.png)
-
-
-     - [X] I have read the Code Of Conduct.
-
-     - [X] I have followed all the steps of submission properly.
-
-
-**Woohoo!! Congratulations on making your open source contribution🎉**
-**Wait for some time to get your PR merged by our team**
+Be respectful and constructive. Maintainers may report behaviour that is not
+in line with the community standards, and spam pull requests will be closed
+without merge.
