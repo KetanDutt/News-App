@@ -33,12 +33,17 @@ class NewsListAdapter(
 
     private var savedUrls: Set<String> = emptySet()
 
+    private fun isSaved(url: String?, urls: Set<String> = savedUrls): Boolean =
+        url != null && url in urls
+
     /** Updates the bookmark icons, rebinding only the rows whose state changed. */
     fun setSavedUrls(urls: Set<String>) {
         val previous = savedUrls
         savedUrls = urls
         currentList.forEachIndexed { index, article ->
-            if ((article.url in previous) != (article.url in urls)) notifyItemChanged(index)
+            if (isSaved(article.url, previous) != isSaved(article.url, urls)) {
+                notifyItemChanged(index)
+            }
         }
     }
 
