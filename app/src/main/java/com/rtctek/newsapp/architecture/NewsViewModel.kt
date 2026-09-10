@@ -58,7 +58,9 @@ class NewsViewModel(application: Application) : AndroidViewModel(application) {
         dao.observeCategory(category)
 
     /** Loading/error state for a category tab, created on first request. */
-    fun categoryStatus(category: String): LiveData<CategoryUiState> =
+    fun categoryStatus(category: String): LiveData<CategoryUiState> = statusFor(category)
+
+    private fun statusFor(category: String): MutableLiveData<CategoryUiState> =
         categoryStatuses.getOrPut(category) {
             MutableLiveData(CategoryUiState()).also { status ->
                 _refreshing.addSource(status) {
@@ -103,7 +105,7 @@ class NewsViewModel(application: Application) : AndroidViewModel(application) {
             onSettled(false)
             return
         }
-        val status = categoryStatus(category)
+        val status = statusFor(category)
         status.value = (status.value ?: CategoryUiState()).copy(loading = true, error = null)
 
         refreshJobs[category] = viewModelScope.launch {

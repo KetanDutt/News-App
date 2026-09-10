@@ -45,6 +45,8 @@ class NewsListFragment : Fragment() {
     private lateinit var adapter: NewsListAdapter
     private var carouselAdapter: CarouselAdapter? = null
 
+    private var carouselAdapter: CarouselAdapter? = null
+
     private var latestArticles: List<NewsModel> = emptyList()
     private var latestStatus: CategoryUiState = CategoryUiState()
 
@@ -108,12 +110,19 @@ class NewsListFragment : Fragment() {
             return
         }
         container.isVisible = true
-        if (carouselInitialized) return
-        carouselInitialized = true
+
+        val topHeadlines = articles.take(TOP_HEADLINES_COUNT)
+        val existing = carouselAdapter
+        if (existing != null) {
+            existing.submit(topHeadlines)
+            return
+        }
 
         val pager = view.findViewById<ViewPager2>(R.id.carousel_pager)
-        pager.adapter = CarouselAdapter(articles.take(TOP_HEADLINES_COUNT), ::openArticle)
-        TabLayoutMediator(view.findViewById(R.id.carousel_dots), pager) { _, _ -> }.attach()
+        carouselAdapter = CarouselAdapter(topHeadlines, ::openArticle).also {
+            pager.adapter = it
+            TabLayoutMediator(view.findViewById(R.id.carousel_dots), pager) { _, _ -> }.attach()
+        }
     }
 
     private fun updatePlaceholderViews(view: View) {

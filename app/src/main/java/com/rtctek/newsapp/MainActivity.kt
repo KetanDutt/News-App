@@ -7,6 +7,7 @@ import android.view.MenuItem
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayout
@@ -36,7 +37,7 @@ class MainActivity : AppCompatActivity() {
         val tabLayout = findViewById<TabLayout>(R.id.tab_layout)
         viewPager.adapter = FragmentAdapter(supportFragmentManager, lifecycle)
         TabLayoutMediator(tabLayout, viewPager) { tab, position ->
-            tab.text = getString(Constants.TAB_CATEGORIES[position].label)
+            tab.text = getString(Constants.TAB_CATEGORIES[position].labelRes)
         }.attach()
 
         val swipeRefresh = findViewById<SwipeRefreshLayout>(R.id.swipe_refresh)

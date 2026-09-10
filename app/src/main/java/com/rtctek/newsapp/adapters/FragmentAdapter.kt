@@ -2,8 +2,8 @@ package com.rtctek.newsapp.adapters
 
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
-import androidx.fragment.app.FragmentStateAdapter
 import androidx.lifecycle.Lifecycle
+import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.rtctek.newsapp.fragments.NewsListFragment
 import com.rtctek.newsapp.utils.Constants
 
