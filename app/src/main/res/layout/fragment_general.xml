@@ -20,7 +20,8 @@
                 android:id="@+id/top_headlines_label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="16dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
                 android:layout_marginTop="12dp"
                 android:text="@string/top_headlines"
                 android:textAppearance="?attr/textAppearanceHeadline6"
@@ -40,7 +41,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="250dp"
                     android:clipToPadding="false"
-                    android:paddingHorizontal="12dp" />
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp" />
 
                 <com.google.android.material.tabs.TabLayout
                     android:id="@+id/carousel_dots"
